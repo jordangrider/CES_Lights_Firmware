@@ -3,7 +3,6 @@
 #include <avr/power.h>
 #endif
 
-//
 
 #define STRIP0_PIN 0
 #define STRIP1_PIN 1
