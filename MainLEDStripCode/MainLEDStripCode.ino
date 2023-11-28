@@ -64,6 +64,8 @@ struct stripStateType {
   colorType orb_color2;
   uint8_t playbar_rate;
   uint8_t playbar_direction;
+  uint playbar_startLed;
+  uint playbar_endLed;
   colorType playbar_color1;
   colorType playbar_color2;
   uint alternating_rate;
@@ -237,8 +239,18 @@ void loop() {
                 } else {
                   configurationSuccess = false;
                 }
-                stripEvents[eventCount].stripState.playbar_color1 = createColor(parsedValues[7], parsedValues[8], parsedValues[9]);
-                stripEvents[eventCount].stripState.playbar_color2 = createColor(parsedValues[10], parsedValues[11], parsedValues[12]);
+                if (parsedValues[7] >= 0 && parsedValues[7] <= NUMPIXELS) {
+                  stripEvents[eventCount].stripState.playbar_startLed = parsedValues[7];
+                } else {
+                  configurationSuccess = false;
+                }
+                if (parsedValues[8] >= 0 && parsedValues[8] <= NUMPIXELS) {
+                  stripEvents[eventCount].stripState.playbar_endLed = parsedValues[8];
+                } else {
+                  configurationSuccess = false;
+                }
+                stripEvents[eventCount].stripState.playbar_color1 = createColor(parsedValues[9], parsedValues[10], parsedValues[11]);
+                stripEvents[eventCount].stripState.playbar_color2 = createColor(parsedValues[12], parsedValues[13], parsedValues[14]);
                 break;
 
               case ALTERNATING_ANIMATION:
@@ -339,7 +351,7 @@ void loop() {
           break;
 
         case PLAYBAR_ANIMATION:
-          playBarFunction(ledStrips[i], striparrays[i], i, stripStates[i].playbar_rate, stripStates[i].playbar_direction, stripStates[i].playbar_color1, stripStates[i].playbar_color2);
+          playBarFunction(ledStrips[i], striparrays[i], i, stripStates[i].playbar_rate, stripStates[i].playbar_direction, stripStates[i].playbar_startLed, stripStates[i].playbar_endLed, stripStates[i].playbar_color1, stripStates[i].playbar_color2);
           break;
 
         case ALTERNATING_ANIMATION:

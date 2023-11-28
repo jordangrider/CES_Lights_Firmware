@@ -3,12 +3,12 @@ uint8_t fadeCalc2(uint8_t target, uint8_t current, uint8_t speed) {
   float ratio = (float)speed / (float)100;
   if (target != current) {
     if (current > target) {
-      retval = current - (uint8_t)(ratio*(current-target)) - 1;
+      retval = current - (uint8_t)(ratio * (current - target)) - 1;
       if (retval < target) {
         retval = target;
       }
     } else {
-      retval = current + (uint8_t)(ratio*(target-current)) + 1;
+      retval = current + (uint8_t)(ratio * (target - current)) + 1;
       if (retval > target) {
         retval = target;
       }
@@ -167,13 +167,13 @@ void orbFunction(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMSTRIPARRAY][
     //if (striparray[i + 10][0] != 0 || striparray[i + 10][1] != 0 || striparray[i + 10][2] != 0) {
     //  ledStrip.setPixelColor(i, ledStrip.Color(striparray[i + 10][0], striparray[i + 10][1], striparray[i + 10][2]));
     //} else {
-      //ledStrip.setPixelColor(i, betterFade(pixelColor, striparray[i + 10][0], striparray[i + 10][1], striparray[i + 10][2], 10));
-      ledStrip.setPixelColor(i, evenBetterFade(pixelColor, striparray[i + 10][0], striparray[i + 10][1], striparray[i + 10][2], 20));
+    //ledStrip.setPixelColor(i, betterFade(pixelColor, striparray[i + 10][0], striparray[i + 10][1], striparray[i + 10][2], 10));
+    ledStrip.setPixelColor(i, evenBetterFade(pixelColor, striparray[i + 10][0], striparray[i + 10][1], striparray[i + 10][2], 20));
     //}
   }
 }
 
-void playBarFunction(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMSTRIPARRAY][3], uint8_t stripId, uint rate, uint direction, colorType orbColor1, colorType orbColor2) {
+void playBarFunction(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMSTRIPARRAY][3], uint8_t stripId, uint rate, uint direction, uint startLed, uint endLed, colorType orbColor1, colorType orbColor2) {
   static unsigned long nextTime[NUMSTRIPS] = {};
   static uint position[NUMSTRIPS] = {};
   if (rate > UPDATE_RATE) {
@@ -181,10 +181,9 @@ void playBarFunction(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMSTRIPARR
   }
   if (millis() - ((1000 / rate) + 1) > nextTime[stripId]) {
     if (direction == 0) {
-      position[stripId] = 0;
+      position[stripId] = startLed;
     } else {
-      position[stripId] = NUMPIXELS + 9;
-      Serial.println("started");
+      position[stripId] = startLed + 9;
     }
     nextTime[stripId] = millis() + 1000 / rate;
     clearArrayAdv(striparray, NUMPIXELS + 10);
@@ -197,7 +196,6 @@ void playBarFunction(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMSTRIPARR
     } else {
       if (position[stripId] != 0) {
         position[stripId]--;
-        Serial.println("running");
       }
     }
     nextTime[stripId] = nextTime[stripId] + 1000 / rate;
@@ -226,9 +224,16 @@ void playBarFunction(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMSTRIPARR
       }
     }
   }
-  for (int i = 0; i < NUMPIXELS; i++) {
-    uint32_t pixelColor = ledStrip.getPixelColor(i);
-    ledStrip.setPixelColor(i, evenBetterFade(pixelColor, striparray[i + 10][0], striparray[i + 10][1], striparray[i + 10][2], 20));
+  if (direction == 0) {
+    for (int i = startLed; i < endLed; i++) {
+      uint32_t pixelColor = ledStrip.getPixelColor(i);
+      ledStrip.setPixelColor(i, evenBetterFade(pixelColor, striparray[i + 10][0], striparray[i + 10][1], striparray[i + 10][2], 20));
+    }
+  } else {
+    for (int i = endLed; i < startLed; i++) {
+      uint32_t pixelColor = ledStrip.getPixelColor(i);
+      ledStrip.setPixelColor(i, evenBetterFade(pixelColor, striparray[i + 10][0], striparray[i + 10][1], striparray[i + 10][2], 20));
+    }
   }
 }
 
