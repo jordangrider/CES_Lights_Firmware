@@ -56,6 +56,7 @@ struct colorType {
 struct stripStateType {
   uint8_t animation;
   colorType idleColor;
+  uint8_t solidColor_rate;
   colorType solidColor;
   uint8_t orb_rate;
   uint8_t orb_spacing;
@@ -205,7 +206,8 @@ void loop() {
 
             switch (parsedValues[4]) {
               case SOLID_COLOR_ANIMATION:
-                stripEvents[eventCount].stripState.solidColor = createColor(parsedValues[5], parsedValues[6], parsedValues[7]);
+                stripEvents[eventCount].stripState.solidColor_rate = parsedValues[5];
+                stripEvents[eventCount].stripState.solidColor = createColor(parsedValues[6], parsedValues[7], parsedValues[8]);
                 break;
 
               case ORBS_ANIMATION:
@@ -339,11 +341,11 @@ void loop() {
     for (int i = 0; i < NUMSTRIPS; i++) {
       switch (stripStates[i].animation) {
         case IDLE_ANIMATION:
-          solidColor(ledStrips[i], striparrays[i], idleColors[i]);
+          solidColor(ledStrips[i], striparrays[i], 100, idleColors[i]);
           break;
 
         case SOLID_COLOR_ANIMATION:
-          solidColor(ledStrips[i], striparrays[i], stripStates[i].solidColor);
+          solidColor(ledStrips[i], striparrays[i], stripStates[i].solidColor_rate ,stripStates[i].solidColor);
           break;
 
         case ORBS_ANIMATION:

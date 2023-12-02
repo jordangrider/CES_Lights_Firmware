@@ -257,12 +257,12 @@ void solidColorAlternating(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMST
   }
 }
 
-void solidColor(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMPIXELS][3], colorType color) {
+void solidColor(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMPIXELS][3], uint8_t speed ,colorType color) {
 
   for (int i = 0; i < NUMPIXELS; i++) {
     uint32_t pixelColor = ledStrip.getPixelColor(i);
     setColor(striparray[i], color.r, color.g, color.b);
-    ledStrip.setPixelColor(i, betterFade(pixelColor, striparray[i][0], striparray[i][1], striparray[i][2], 2));
+    ledStrip.setPixelColor(i, betterFade(pixelColor, striparray[i][0], striparray[i][1], striparray[i][2], speed));
   }
 }
 
