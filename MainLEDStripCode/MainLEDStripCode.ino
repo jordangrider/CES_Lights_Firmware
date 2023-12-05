@@ -3,6 +3,7 @@
 #include <avr/power.h>
 #endif
 
+#define DEVICE_ID 2
 
 #define STRIP0_PIN 0
 #define STRIP1_PIN 1
@@ -10,6 +11,7 @@
 #define STRIP3_PIN 3
 #define STRIP4_PIN 4
 
+#define TEST_COMMAND 0
 #define STOP_COMMAND 1
 #define START_COMMAND 2
 #define PAUSE_COMMAND 3
@@ -92,10 +94,6 @@ const int MAX_VALUES = 20;     // Maximum number of values to parse
 int parsedValues[MAX_VALUES];  // Array to store parsed values
 int numValues = 0;             // Variable to track the number of parsed values
 
-colorType orb_color1 = { 0, 100, 100 };
-colorType orb_color2 = { 0, 0, 100 };
-colorType playbar_color1 = { 0, 100, 100 };
-colorType playbar_color2 = { 2, 5, 15 };
 colorType black = { 0, 0, 0 };
 
 
@@ -114,31 +112,7 @@ void setup() {
 
   Serial.begin(115200);
 
-  for (int i = 0; i < NUMSTRIPS; i++) {
-    ledStrips[i].show();  // Display the changes
-    stripStates[i].idleColor = black;
-  }
-
-  // stripStates[0].animation = PLAYBAR_ANIMATION;
-  // stripStates[0].orb_rate = 25;
-  // stripStates[0].orb_spacing = 25;
-  // stripStates[0].orb_color1 = orb_color1;
-  // stripStates[0].orb_color2 = orb_color2;
-  // stripStates[0].orb_direction = 0;
-  // stripStates[0].playbar_rate = 30;
-  // stripStates[0].playbar_direction = 0;
-  // stripStates[0].playbar_color1 = playbar_color1;
-  // stripStates[0].playbar_color2 = playbar_color2;
-  // stripStates[1].animation = PLAYBAR_ANIMATION;
-  // stripStates[1].orb_rate = 25;
-  // stripStates[1].orb_spacing = 25;
-  // stripStates[1].orb_color1 = orb_color1;
-  // stripStates[1].orb_color2 = orb_color2;
-  // stripStates[1].orb_direction = 1;
-  // stripStates[1].playbar_rate = 30;
-  // stripStates[1].playbar_direction = 1;
-  // stripStates[1].playbar_color1 = playbar_color1;
-  // stripStates[1].playbar_color2 = playbar_color2;
+  startUpAnimation();
 }
 
 static unsigned long lastTime = 0;
@@ -150,13 +124,15 @@ static bool play = false;
 void loop() {
 
   if (Serial.available() > 0) {
-    // Read the incoming data until a newline character is received
     String inputString = Serial.readStringUntil('\n');
-    // Parse the comma-separated values and store them in the array
     parseData(inputString);
 
     if (parsedValues[0] == 51) {
       switch (parsedValues[1]) {
+        case TEST_COMMAND:
+          Serial.println(DEVICE_ID);
+          break;
+
         case STOP_COMMAND:
           Serial.println("Received STOP command");
           play = false;
@@ -277,8 +253,6 @@ void loop() {
             if (configurationSuccess) {
               Serial.print("Event Registered as #: ");
               Serial.println(eventCount);
-              //printStripState(stripEvents[eventCount].stripState);
-              //printEventType(stripEvents[eventCount]);
               eventCount++;
             } else {
               Serial.println("Invalid Event Configuration");
@@ -329,11 +303,6 @@ void loop() {
         if (runningTime > stripEvents[j].startTime) {
           stripEvents[j].hasrun = true;
           stripStates[stripEvents[j].stripNum] = stripEvents[j].stripState;
-          //printStripState(stripStates[stripEvents[j].stripNum]);
-          // Serial.print("Playing Animation: ");
-          // Serial.print(j);
-          // Serial.print(" at time ");
-          // Serial.println(runningTime);
         }
       }
     }
@@ -345,7 +314,7 @@ void loop() {
           break;
 
         case SOLID_COLOR_ANIMATION:
-          solidColor(ledStrips[i], striparrays[i], stripStates[i].solidColor_rate ,stripStates[i].solidColor);
+          solidColor(ledStrips[i], striparrays[i], stripStates[i].solidColor_rate, stripStates[i].solidColor);
           break;
 
         case ORBS_ANIMATION:

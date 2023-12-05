@@ -257,7 +257,7 @@ void solidColorAlternating(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMST
   }
 }
 
-void solidColor(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMPIXELS][3], uint8_t speed ,colorType color) {
+void solidColor(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMPIXELS][3], uint8_t speed, colorType color) {
 
   for (int i = 0; i < NUMPIXELS; i++) {
     uint32_t pixelColor = ledStrip.getPixelColor(i);
@@ -419,5 +419,27 @@ void rainbowTest(Adafruit_NeoPixel &ledStrip, uint8_t stripId) {
       ledStrip.setPixelColor(c, color);                           // Set pixel 'c' to value 'color'
     }
     firstPixelHue[stripId] += 65536 / 200;  // One cycle of color wheel over 90 frames
+  }
+}
+
+void startUpAnimation() {
+  for (int j = 0; j < 10; j++) {
+    for (int i = 0; i < NUMSTRIPS; i++) {
+      solidColor(ledStrips[i], striparrays[i], 20, createColor(50, 50, 50));
+      ledStrips[i].show();  // Display the changes
+    }
+    delay(20);
+  }
+  for (int j = 0; j < 100; j++) {
+    for (int i = 0; i < NUMSTRIPS; i++) {
+      solidColor(ledStrips[i], striparrays[i], 1, createColor(0, 0, 0));
+      ledStrips[i].show();  // Display the changes
+    }
+    delay(20);
+  }
+
+
+  for (int i = 0; i < NUMSTRIPS; i++) {
+    stripStates[i].idleColor = black;
   }
 }
