@@ -32,12 +32,13 @@
 
 #define NUMSTRIPS 5
 
-#define NUMEVENTS 100
+#define NUMEVENTS 500
 
 #define MAX_UNSIGNED_LONG (2 ^ 32 - 1)
 
 #define UPDATE_RATE (50)  //Update Rate in Hz
 #define UPDATE_INTERVAL (1000 / UPDATE_RATE);
+#define REFRESH_INTERVAL 1000
 
 Adafruit_NeoPixel strip0(NUMPIXELS, STRIP0_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel strip1(NUMPIXELS, STRIP1_PIN, NEO_GRB + NEO_KHZ800);
@@ -113,14 +114,19 @@ void setup() {
   Serial.begin(115200);
 
   startUpAnimation();
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
 }
 
 static unsigned long lastTime = 0;
 static unsigned long runningTime = 0;
 static unsigned long updateTime = 0;
+static unsigned long refreshTime = 0;
+static bool refreshTrigger = false;
 static uint count = 0;
 static uint slowCount = 0;
 static bool play = false;
+static bool ledOn = false;
 void loop() {
 
   if (Serial.available() > 0) {
@@ -339,8 +345,20 @@ void loop() {
       }
     }
 
+    if (millis() > refreshTime) {
+      refreshTrigger = true;
+      refreshTime = millis() + REFRESH_INTERVAL;
+
+      if (ledOn) {
+        digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+      } else {
+        digitalWrite(LED_BUILTIN, LOW);  // turn the LED on (HIGH is the voltage level)
+      }
+      ledOn = !ledOn;
+    }
+
     for (int i = 0; i < NUMSTRIPS; i++) {
-      if (hasPixelStateChanged(ledStrips[i], i)) {
+      if (hasPixelStateChanged(ledStrips[i], i) || refreshTrigger) {
         ledStrips[i].show();               // Display the changes
         storePixelState(ledStrips[i], i);  // Update the extra copy
       }
@@ -350,17 +368,23 @@ void loop() {
     while (millis() < updateTime) {}
     updateTime = millis() + UPDATE_INTERVAL;
     runningTime = runningTime + millis() - lastTime;
+    refreshTrigger = false;
     //Serial.println(runningTime);
   } else {
-    // for (int i = 0; i < NUMSTRIPS; i++) {
-    //   solidColor(ledStrips[i], striparrays[i], idleColors[i]);
-    // }
-    // for (int i = 0; i < NUMSTRIPS; i++) {
-    //   if (hasPixelStateChanged(ledStrips[i], i)) {
-    //     ledStrips[i].show();               // Display the changes
-    //     storePixelState(ledStrips[i], i);  // Update the extra copy
-    //   }
-    // }
+    if (millis() > refreshTime) {
+      for (int i = 0; i < NUMSTRIPS; i++) {
+          ledStrips[i].show();               // Display the changes
+          storePixelState(ledStrips[i], i);  // Update the extra copy
+      }
+      refreshTime = millis() + REFRESH_INTERVAL;
+
+      if (ledOn) {
+        digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+      } else {
+        digitalWrite(LED_BUILTIN, LOW);  // turn the LED on (HIGH is the voltage level)
+      }
+      ledOn = !ledOn;
+    }
   }
   lastTime = millis();
 }
