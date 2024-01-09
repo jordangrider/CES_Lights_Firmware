@@ -26,6 +26,7 @@
 #define PLAYBAR_ANIMATION 3
 #define ALTERNATING_ANIMATION 4
 #define RAINBOW_TEST_ANIMATION 5
+#define FADE_COLOR_ANIMATION 6
 
 #define NUMPIXELS 180
 #define NUMSTRIPARRAY NUMPIXELS + 30
@@ -75,6 +76,8 @@ struct stripStateType {
   uint alternating_rate;
   colorType alternating_color1;
   colorType alternating_color2;
+  uint8_t fadeColor_rate;
+  colorType fadeColor;  
 };
 
 struct eventType {
@@ -250,6 +253,11 @@ void loop() {
               case RAINBOW_TEST_ANIMATION:
                 break;
 
+              case FADE_COLOR_ANIMATION:
+                stripEvents[eventCount].stripState.fadeColor_rate = parsedValues[5];
+                stripEvents[eventCount].stripState.fadeColor = createColor(parsedValues[6], parsedValues[7], parsedValues[8]);
+                break; 
+
               default:
                 Serial.println("Invalid Animation ID");
                 configurationSuccess = false;
@@ -337,6 +345,10 @@ void loop() {
 
         case RAINBOW_TEST_ANIMATION:
           rainbowTest(ledStrips[i], i);
+          break;
+
+        case FADE_COLOR_ANIMATION:
+          fadeColor(ledStrips[i], striparrays[i], stripStates[i].fadeColor_rate, stripStates[i].fadeColor);
           break;
 
         default:

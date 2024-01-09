@@ -204,7 +204,7 @@ void playBarFunction(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMSTRIPARR
   for (int i = 0; i < NUMPIXELS + 10; i++) {
     if (direction == 0) {
       if (i == position[stripId]) {
-        setColor(striparray[i + 7], 100, 100, 100);
+        setColor(striparray[i + 7], orbColor1.r, orbColor1.g, orbColor1.b);
         setColor(striparray[i + 6], orbColor1.r, orbColor1.g, orbColor1.b);
         setColor(striparray[i + 5], orbColor1.r, orbColor1.g, orbColor1.b);
         setColor(striparray[i + 4], orbColor1.r, orbColor1.g, orbColor1.b);
@@ -214,7 +214,7 @@ void playBarFunction(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMSTRIPARR
       }
     } else {
       if (i == position[stripId]) {
-        setColor(striparray[i + 1], 100, 100, 100);
+        setColor(striparray[i + 1], orbColor1.r, orbColor1.g, orbColor1.b);
         setColor(striparray[i + 2], orbColor1.r, orbColor1.g, orbColor1.b);
         setColor(striparray[i + 3], orbColor1.r, orbColor1.g, orbColor1.b);
         setColor(striparray[i + 4], orbColor1.r, orbColor1.g, orbColor1.b);
@@ -265,6 +265,22 @@ void solidColor(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMPIXELS][3], u
     ledStrip.setPixelColor(i, betterFade(pixelColor, striparray[i][0], striparray[i][1], striparray[i][2], speed));
   }
 }
+
+void fadeColor(Adafruit_NeoPixel &ledStrip, uint8_t striparray[NUMPIXELS][3], uint8_t speed, colorType endColor) {
+  static float red = 0;
+  static float green = 0;
+  static float blue = 0;
+  red = ((100.0 - speed) / 100.0) * red + (speed / 100.0) * endColor.r;
+  green = ((100.0 - speed) / 100.0) * green + (speed / 100.0) * endColor.g;
+  blue = ((100.0 - speed) / 100.0) * blue + (speed / 100.0) * endColor.b;
+
+  for (int i = 0; i < NUMPIXELS; i++) {
+    uint32_t pixelColor = ledStrip.getPixelColor(i);
+    setColor(striparray[i], (uint8_t)red, (uint8_t)green, (uint8_t)blue);
+    ledStrip.setPixelColor(i, betterFade(pixelColor, striparray[i][0], striparray[i][1], striparray[i][2], 30));
+  }
+}
+
 
 uint32_t lastPixelState[NUMSTRIPS][NUMPIXELS];
 
